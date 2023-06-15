@@ -3,6 +3,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +22,8 @@ public class AlunoCRUD extends JFrame implements ActionListener {
     private DefaultTableModel tableModel;
     private List<Aluno> alunos;
     private int proximoId;
+
+    Aluno aluno = new Aluno();
 
     public AlunoCRUD() {
         setTitle("Aluno CRUD");
@@ -114,6 +120,28 @@ public class AlunoCRUD extends JFrame implements ActionListener {
     }
 
     private void cadastrarAluno() {
+
+//       final String query = "INSERT INTO aluno (nome, descricao) VALUES (?, ?)";
+//        Connection conn = null;
+//        PreparedStatement prepStmt = null;
+//        ResultSet rs = null;
+//
+//        try {
+//            conn = ConectarBD.getConexao();
+//
+//            prepStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+//            prepStmt.setString(Integer.parseInt(aluno.getNome(), 10);
+//            prepStmt.setString(Integer.parseInt(aluno.getEndereco(), 10);
+//            prepStmt.execute();
+//
+//            rs = prepStmt.getGeneratedKeys();
+//            if (rs.next()){
+//                aluno.setId(rs.getInt(0));
+//            }
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
+
         String nome = nomeField.getText();
         String idadeString = idadeField.getText();
         String email = emailField.getText();
@@ -142,6 +170,25 @@ public class AlunoCRUD extends JFrame implements ActionListener {
     }
 
     private void atualizarAluno() {
+
+//        final String query = "UPDATE aluno SET(nome, descricao) VALUES (?, ?)";
+//
+//        Connection conn = null;
+//        PreparedStatement prepStmt = null;
+//
+//        try {
+//            conn = ConectarBD.getConexao();
+//
+//            prepStmt = conn.prepareStatement(query);
+//            prepStmt.setString(aluno.getNome());
+//            prepStmt.setString(aluno.getEndereco());
+//            prepStmt.setInt(3, aluno.getId());
+//            prepStmt.execute();
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
+
         int selectedRow = tabela.getSelectedRow();
         if (selectedRow >= 0) {
             String nome = nomeField.getText();
@@ -186,6 +233,23 @@ public class AlunoCRUD extends JFrame implements ActionListener {
     }
 
     private void excluirAluno() {
+
+//        final String query = "DELETE FROM aluno WHERE id = ?";
+//
+//        Connection conn = null;
+//        PreparedStatement prepStmt = null;
+//
+//        try {
+//            conn = ConectarBD.getConexao();
+//
+//            prepStmt = conn.prepareStatement(query);
+//            prepStmt.setInt(1, aluno.getId());
+//            prepStmt.execute();
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
+
         int selectedRow = tabela.getSelectedRow();
         if (selectedRow >= 0) {
             int confirm = JOptionPane.showConfirmDialog(null, "Deseja remover o aluno selecionado?", "Remover Aluno", JOptionPane.YES_NO_OPTION);
@@ -197,6 +261,32 @@ public class AlunoCRUD extends JFrame implements ActionListener {
             }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um aluno para remover.");
+        }
+    }
+
+    private void listar(){
+        final String query = "SELECT * FROM toArray ORDER BY id";
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConectarBD.getConexao();
+
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(query);
+
+            while (rs.next()){
+                Aluno aluno = new Aluno();
+                aluno.setId(rs.getInt("id"));
+                aluno.setNome(rs.getString("nome"));
+                aluno.setObservacoes(rs.getString("observacao"));
+
+            }
+
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 

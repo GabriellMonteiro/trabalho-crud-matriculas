@@ -12,6 +12,8 @@ public class Aluno {
     private String observacoes;
     private boolean ativo;
 
+    public Aluno(){}
+
     public Aluno(int id, String nome, int idade, String email, String endereco, String cep, String telefone,
                  String usuario, String senha, String curso, String observacoes, boolean ativo) {
         this.id = id;
