@@ -10,12 +10,12 @@ public class Aluno {
     private String senha;
     private String curso;
     private String observacoes;
-    private boolean ativo;
+    private String ativo;
 
     public Aluno(){}
 
     public Aluno(int id, String nome, int idade, String email, String endereco, String cep, String telefone,
-                 String usuario, String senha, String curso, String observacoes, boolean ativo) {
+                 String usuario, String senha, String curso, String observacoes, String ativo) {
         this.id = id;
         this.nome = nome;
         this.idade = idade;
@@ -118,11 +118,11 @@ public class Aluno {
         this.observacoes = observacoes;
     }
 
-    public boolean isAtivo() {
+    public String isAtivo() {
         return ativo;
     }
 
-    public void setAtivo(boolean ativo) {
+    public void setAtivo(String ativo) {
         this.ativo = ativo;
     }
 

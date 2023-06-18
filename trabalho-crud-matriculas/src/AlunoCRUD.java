@@ -3,10 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +12,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
     private JPasswordField senhaField;
     private JComboBox<String> cursoComboBox;
     private JTextArea observacoesField;
-    private JCheckBox ativoCheckBox;
+    private JComboBox<String> ativoCheckBox;
     private JButton cadastrarButton, atualizarButton, excluirButton;
 
     private JTable tabela;
@@ -23,7 +20,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
     private List<Aluno> alunos;
     private int proximoId;
 
-    Aluno aluno = new Aluno();
+    private static Aluno aluno = new Aluno();
 
     public AlunoCRUD() {
         setTitle("Aluno CRUD");
@@ -73,7 +70,6 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         cursoComboBox.addItem("Medicina");
         cursoComboBox.addItem("Administração");
         cursoComboBox.addItem("Ads");
-
         panel.add(cursoComboBox);
 
         panel.add(new JLabel("Observações"));
@@ -81,7 +77,9 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         panel.add(new JScrollPane(observacoesField));
 
         panel.add(new JLabel("Ativo*"));
-        ativoCheckBox = new JCheckBox("Ativo");
+        ativoCheckBox = new JComboBox<>();
+        ativoCheckBox.addItem("Sim");
+        ativoCheckBox.addItem("Não");
         panel.add(ativoCheckBox);
 
         cadastrarButton = new JButton("Cadastrar");
@@ -113,35 +111,13 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         if (e.getSource() == cadastrarButton) {
             cadastrarAluno();
         } else if (e.getSource() == atualizarButton) {
-            atualizarAluno();
+//            atualizarAluno();
         } else if (e.getSource() == excluirButton) {
             excluirAluno();
         }
     }
 
     private void cadastrarAluno() {
-
-//       final String query = "INSERT INTO aluno (nome, descricao) VALUES (?, ?)";
-//        Connection conn = null;
-//        PreparedStatement prepStmt = null;
-//        ResultSet rs = null;
-//
-//        try {
-//            conn = ConectarBD.getConexao();
-//
-//            prepStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-//            prepStmt.setString(Integer.parseInt(aluno.getNome(), 10);
-//            prepStmt.setString(Integer.parseInt(aluno.getEndereco(), 10);
-//            prepStmt.execute();
-//
-//            rs = prepStmt.getGeneratedKeys();
-//            if (rs.next()){
-//                aluno.setId(rs.getInt(0));
-//            }
-//        } catch (Exception e){
-//            e.printStackTrace();
-//        }
-
         String nome = nomeField.getText();
         String idadeString = idadeField.getText();
         String email = emailField.getText();
@@ -152,143 +128,236 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         String senha = new String(senhaField.getPassword());
         String curso = (String) cursoComboBox.getSelectedItem();
         String observacoes = observacoesField.getText();
-        boolean ativo = ativoCheckBox.isSelected();
+        String ativo = (String)ativoCheckBox.getSelectedItem();
 
         if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
             int idade = Integer.parseInt(idadeString);
-
             Aluno aluno = new Aluno(proximoId, nome, idade, email, endereco, cep, telefone, usuario, senha, curso, observacoes, ativo);
             alunos.add(aluno);
             tableModel.addRow(aluno.toArray());
-
             proximoId++;
 
             limparCampos();
+
+            final String query = "INSERT INTO alunos (NomeCompleto, Idade, Email, Endereco, CEP," +
+                    " Telefone, Usuario, Senha, Curso, Observacoes, Ativo) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            Connection conn = null;
+            PreparedStatement prepStmt = null;
+            ResultSet rs = null;
+
+            try {
+                conn = ConectarBD.getConexao();
+                prepStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                prepStmt.setString(1, nome);
+                prepStmt.setInt(2, idade);
+                prepStmt.setString(3, email);
+                prepStmt.setString(4, endereco);
+                prepStmt.setString(5, cep);
+                prepStmt.setString(6, telefone);
+                prepStmt.setString(7, usuario);
+                prepStmt.setString(8, senha);
+                prepStmt.setString(9, curso);
+                prepStmt.setString(10, observacoes);
+                prepStmt.setString(11, ativo);
+
+                prepStmt.executeUpdate();
+
+                rs = prepStmt.getGeneratedKeys();
+                if (rs.next()) {
+                    aluno.setId(rs.getInt(1));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Preencha todos os campos obrigatórios.");
         }
     }
 
-    private void atualizarAluno() {
-
-//        final String query = "UPDATE aluno SET(nome, descricao) VALUES (?, ?)";
+//    private void atualizarAluno() {
 //
-//        Connection conn = null;
-//        PreparedStatement prepStmt = null;
+//        int selectedRow = tabela.getSelectedRow();
+//        if (selectedRow >= 0) {
+//            String nome = nomeField.getText();
+//            String idadeString = idadeField.getText();
+//            String email = emailField.getText();
+//            String endereco = enderecoField.getText();
+//            String cep = cepField.getText();
+//            String telefone = telefoneField.getText();
+//            String usuario = usuarioField.getText();
+//            String senha = new String(senhaField.getPassword());
+//            String curso = (String) cursoComboBox.getSelectedItem();
+//            String observacoes = observacoesField.getText();
+//            boolean ativo = ativoCheckBox.isSelected();
 //
-//        try {
-//            conn = ConectarBD.getConexao();
+//            if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
+//                int idade = Integer.parseInt(idadeString);
 //
-//            prepStmt = conn.prepareStatement(query);
-//            prepStmt.setString(aluno.getNome());
-//            prepStmt.setString(aluno.getEndereco());
-//            prepStmt.setInt(3, aluno.getId());
-//            prepStmt.execute();
+//                Aluno aluno = alunos.get(selectedRow);
+//                aluno.setNome(nome);
+//                aluno.setIdade(idade);
+//                aluno.setEmail(email);
+//                aluno.setEndereco(endereco);
+//                aluno.setCep(cep);
+//                aluno.setTelefone(telefone);
+//                aluno.setUsuario(usuario);
+//                aluno.setSenha(senha);
+//                aluno.setCurso(curso);
+//                aluno.setObservacoes(observacoes);
+//                aluno.setAtivo(ativo);
 //
-//        } catch (Exception e){
-//            e.printStackTrace();
+//                // Atualizar linha na tabela
+//                tableModel.removeRow(selectedRow);
+//                tableModel.insertRow(selectedRow, aluno.toArray());
+//
+//                limparCampos();
+//
+//                // Atualizar no banco de dados
+//                final String query = "UPDATE alunos SET NomeCompleto=?, Idade=?, Email=?, Endereco=?, CEP=?, " +
+//                        "Telefone=?, Usuario=?, Senha=?, Curso=?, Observacoes=?, Ativo=? WHERE ID=?";
+//                Connection conn = null;
+//                PreparedStatement prepStmt = null;
+//
+//                try {
+//                    conn = ConectarBD.getConexao();
+//                    prepStmt = conn.prepareStatement(query);
+//                    prepStmt.setString(1, nome);
+//                    prepStmt.setInt(2, idade);
+//                    prepStmt.setString(3, email);
+//                    prepStmt.setString(4, endereco);
+//                    prepStmt.setString(5, cep);
+//                    prepStmt.setString(6, telefone);
+//                    prepStmt.setString(7, usuario);
+//                    prepStmt.setString(8, senha);
+//                    prepStmt.setString(9, curso);
+//                    prepStmt.setString(10, observacoes);
+//                    prepStmt.setBoolean(11, ativo);
+//                    prepStmt.setInt(12, aluno.getId());
+//
+//                    prepStmt.executeUpdate();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                } finally {
+//                    // Certifique-se de fechar as conexões e a instrução preparada
+//                    if (prepStmt != null) {
+//                        try {
+//                            prepStmt.close();
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//
+//                    if (conn != null) {
+//                        try {
+//                            conn.close();
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            } else {
+//                JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios.");
+//            }
+//        } else {
+//            JOptionPane.showMessageDialog(this, "Selecione um aluno para atualizar.");
 //        }
-
-        int selectedRow = tabela.getSelectedRow();
-        if (selectedRow >= 0) {
-            String nome = nomeField.getText();
-            String idadeString = idadeField.getText();
-            String email = emailField.getText();
-            String endereco = enderecoField.getText();
-            String cep = cepField.getText();
-            String telefone = telefoneField.getText();
-            String usuario = usuarioField.getText();
-            String senha = new String(senhaField.getPassword());
-            String curso = (String) cursoComboBox.getSelectedItem();
-            String observacoes = observacoesField.getText();
-            boolean ativo = ativoCheckBox.isSelected();
-
-            if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
-                int idade = Integer.parseInt(idadeString);
-
-                Aluno aluno = alunos.get(selectedRow);
-                aluno.setNome(nome);
-                aluno.setIdade(idade);
-                aluno.setEmail(email);
-                aluno.setEndereco(endereco);
-                aluno.setCep(cep);
-                aluno.setTelefone(telefone);
-                aluno.setUsuario(usuario);
-                aluno.setSenha(senha);
-                aluno.setCurso(curso);
-                aluno.setObservacoes(observacoes);
-                aluno.setAtivo(ativo);
-
-                // Atualizar linha na tabela
-                tableModel.removeRow(selectedRow);
-                tableModel.insertRow(selectedRow, aluno.toArray());
-
-                limparCampos();
-            } else {
-                JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios.");
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Selecione um aluno para atualizar.");
-        }
-    }
+//
+//    }
 
     private void excluirAluno() {
-
-//        final String query = "DELETE FROM aluno WHERE id = ?";
-//
-//        Connection conn = null;
-//        PreparedStatement prepStmt = null;
-//
-//        try {
-//            conn = ConectarBD.getConexao();
-//
-//            prepStmt = conn.prepareStatement(query);
-//            prepStmt.setInt(1, aluno.getId());
-//            prepStmt.execute();
-//
-//        } catch (Exception e){
-//            e.printStackTrace();
-//        }
-
         int selectedRow = tabela.getSelectedRow();
         if (selectedRow >= 0) {
             int confirm = JOptionPane.showConfirmDialog(null, "Deseja remover o aluno selecionado?", "Remover Aluno", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                alunos.remove(selectedRow);
+                Aluno aluno = alunos.get(selectedRow);
                 tableModel.removeRow(selectedRow);
 
-                limparCampos();
+                final String query = "DELETE FROM alunos WHERE id = ?";
+
+                Connection conn = null;
+                PreparedStatement prepStmt = null;
+
+                try {
+                    conn = ConectarBD.getConexao();
+
+                    prepStmt = conn.prepareStatement(query);
+                    prepStmt.setInt(1, aluno.getId());
+                    prepStmt.execute();
+
+                    limparCampos();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um aluno para remover.");
         }
     }
 
-    private void listar(){
-        final String query = "SELECT * FROM toArray ORDER BY id";
 
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+//    private void listar() {
+//        final String query = "SELECT * FROM crudalunos ORDER BY id";
+//
+//        Connection conn = null;
+//        Statement stmt = null;
+//        ResultSet rs = null;
+//
+//        try {
+//            conn = ConectarBD.getConexao();
+//
+//            stmt = conn.createStatement();
+//            rs = stmt.executeQuery(query);
+//
+//            // Limpar o modelo de dados atual da tabela
+//            tableModel.setRowCount(0);
+//
+//            while (rs.next()) {
+//                int id = rs.getInt("id");
+//                String nome = rs.getString("nome");
+//                int idade = rs.getInt("idade");
+//                String email = rs.getString("email");
+//                String endereco = rs.getString("endereco");
+//                String cep = rs.getString("cep");
+//                String telefone = rs.getString("telefone");
+//                String curso = rs.getString("curso");
+//                String observacao = rs.getString("observacao");
+//                boolean ativo = rs.getBoolean("ativo");
+//
+//                // Adicionar uma nova linha ao modelo de dados com os valores obtidos
+//                tableModel.addRow(new Object[]{id, nome, idade, email, endereco, cep, telefone, curso, observacao, ativo});
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        } finally {
+//            // Certifique-se de fechar as conexões e o resultado
+//            if (rs != null) {
+//                try {
+//                    rs.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            if (stmt != null) {
+//                try {
+//                    stmt.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
-        try {
-            conn = ConectarBD.getConexao();
 
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(query);
-
-            while (rs.next()){
-                Aluno aluno = new Aluno();
-                aluno.setId(rs.getInt("id"));
-                aluno.setNome(rs.getString("nome"));
-                aluno.setObservacoes(rs.getString("observacao"));
-
-            }
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
     private void limparCampos() {
         nomeField.setText("");
@@ -301,6 +370,6 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         senhaField.setText("");
         cursoComboBox.setSelectedIndex(0);
         observacoesField.setText("");
-        ativoCheckBox.setSelected(false);
+        ativoCheckBox.setSelectedIndex(0);
     }
 }
