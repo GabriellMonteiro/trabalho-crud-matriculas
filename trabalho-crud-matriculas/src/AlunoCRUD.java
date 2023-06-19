@@ -70,7 +70,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         cursoComboBox.addItem("Engenharia");
         cursoComboBox.addItem("Medicina");
         cursoComboBox.addItem("Administração");
-        cursoComboBox.addItem("Ads");
+        cursoComboBox.addItem("Analise e Desenvolvimento de Sistemas");
         panel.add(cursoComboBox);
 
         panel.add(new JLabel("Observações"));
@@ -106,7 +106,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
 
         listar();
         proximoId = 1;
-    }
+    }// fim do metodo alunoCRUD
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == cadastrarButton) {
@@ -165,7 +165,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         } else {
             JOptionPane.showMessageDialog(this, "Preencha todos os campos obrigatórios.");
         }
-    }
+    }// fim do metodo cadastrarAluno
 
     private void atualizarAluno() {
 
@@ -226,7 +226,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(this, "Selecione um aluno para atualizar.");
         }
 
-    }
+    }// fim do metodo atualizarAluno
 
     private void inserirBd(String nome, String email, String endereco, String cep, String telefone, String usuario, String senha, String curso, String observacoes,
                            String ativo, int idade, PreparedStatement prepStmt) throws SQLException {
@@ -241,7 +241,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         prepStmt.setString(9, curso);
         prepStmt.setString(10, observacoes);
         prepStmt.setString(11, ativo);
-    }
+    }// fim do metodo inserirBd
 
     private void excluirAluno() {
 
@@ -274,9 +274,9 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um aluno para remover.");
         }
-    }
+    }// fim do metodo excluirAluno
 
-    private ArrayList<Aluno> listar() {
+    private void listar() {
         final String query = "SELECT * FROM Alunos ORDER BY id";
 
         Connection conn = null;
@@ -310,8 +310,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return alunos;
-    }
+    }// fim do metodo listar
 
 
     private void limparCampos() {
