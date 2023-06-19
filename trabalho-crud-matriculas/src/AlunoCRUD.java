@@ -17,7 +17,11 @@ public class AlunoCRUD extends JFrame implements ActionListener {
 
     private JTable tabela;
     private DefaultTableModel tableModel;
-    private List<Aluno> alunos;
+
+    ArrayList<Aluno> alunos = new ArrayList<>();
+
+//    private static  List<Aluno> alunos;
+//    private List<Aluno> alunos;
     private int proximoId;
 
     private static Aluno aluno = new Aluno();
@@ -103,7 +107,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         add(new JScrollPane(tabela), BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        alunos = new ArrayList<>();
+        listar();
         proximoId = 1;
     }
 
@@ -133,7 +137,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
             int idade = Integer.parseInt(idadeString);
             Aluno aluno = new Aluno(proximoId, nome, idade, email, endereco, cep, telefone, usuario, senha, curso, observacoes, ativo);
-            alunos.add(aluno);
+            listar().add(aluno);
             tableModel.addRow(aluno.toArray());
             proximoId++;
 
@@ -266,12 +270,15 @@ public class AlunoCRUD extends JFrame implements ActionListener {
 //    }
 
     private void excluirAluno() {
+
         int selectedRow = tabela.getSelectedRow();
         if (selectedRow >= 0) {
             int confirm = JOptionPane.showConfirmDialog(null, "Deseja remover o aluno selecionado?", "Remover Aluno", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                Aluno aluno = alunos.get(selectedRow);
+                Aluno aluno = listar().get(selectedRow);
                 tableModel.removeRow(selectedRow);
+
+                limparCampos();
 
                 final String query = "DELETE FROM alunos WHERE id = ?";
 
@@ -295,68 +302,40 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         }
     }
 
+    private ArrayList<Aluno> listar() {
+        final String query = "SELECT * FROM Alunos ORDER BY id";
 
-//    private void listar() {
-//        final String query = "SELECT * FROM crudalunos ORDER BY id";
-//
-//        Connection conn = null;
-//        Statement stmt = null;
-//        ResultSet rs = null;
-//
-//        try {
-//            conn = ConectarBD.getConexao();
-//
-//            stmt = conn.createStatement();
-//            rs = stmt.executeQuery(query);
-//
-//            // Limpar o modelo de dados atual da tabela
-//            tableModel.setRowCount(0);
-//
-//            while (rs.next()) {
-//                int id = rs.getInt("id");
-//                String nome = rs.getString("nome");
-//                int idade = rs.getInt("idade");
-//                String email = rs.getString("email");
-//                String endereco = rs.getString("endereco");
-//                String cep = rs.getString("cep");
-//                String telefone = rs.getString("telefone");
-//                String curso = rs.getString("curso");
-//                String observacao = rs.getString("observacao");
-//                boolean ativo = rs.getBoolean("ativo");
-//
-//                // Adicionar uma nova linha ao modelo de dados com os valores obtidos
-//                tableModel.addRow(new Object[]{id, nome, idade, email, endereco, cep, telefone, curso, observacao, ativo});
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } finally {
-//            // Certifique-se de fechar as conexões e o resultado
-//            if (rs != null) {
-//                try {
-//                    rs.close();
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            if (stmt != null) {
-//                try {
-//                    stmt.close();
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            if (conn != null) {
-//                try {
-//                    conn.close();
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
 
+        try {
+            conn = ConectarBD.getConexao();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                 aluno = new Aluno();
+                 aluno.setId(rs.getInt("ID"));
+                 aluno.setNome(rs.getString("NomeCompleto"));
+                 aluno.setIdade(rs.getInt("Idade"));
+                 aluno.setEmail(rs.getString("Email"));
+                 aluno.setEndereco(rs.getString("Endereco"));
+                 aluno.setCep(rs.getString("CEP"));
+                 aluno.setTelefone(rs.getString("Telefone"));
+                 aluno.setCurso(rs.getString("Curso"));
+                 aluno.setObservacoes(rs.getString("Observacoes"));
+                 aluno.setAtivo(rs.getString("Ativo"));
+
+                tableModel.addRow(aluno.toArray());
+                alunos.add(aluno);
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return alunos;
+    }
 
 
     private void limparCampos() {
