@@ -4,9 +4,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConectarBD {
-    private static final String URL = "jdbc:mysql://localhost:3306/Aluno";
+    private static final String URL = "jdbc:mysql://localhost:3306/crudalunos";
     private static final String USARIO = "root";
-    private static final String SENHA = "*****";
+    private static final String SENHA = "Spac0440!";
 
     private static Connection conexao;
 

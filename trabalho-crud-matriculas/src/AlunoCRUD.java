@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class AlunoCRUD extends JFrame implements ActionListener {
     private JTextField nomeField, idadeField, emailField, enderecoField, cepField, telefoneField, usuarioField;
@@ -20,8 +19,6 @@ public class AlunoCRUD extends JFrame implements ActionListener {
 
     ArrayList<Aluno> alunos = new ArrayList<>();
 
-//    private static  List<Aluno> alunos;
-//    private List<Aluno> alunos;
     private int proximoId;
 
     private static Aluno aluno = new Aluno();
@@ -115,7 +112,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         if (e.getSource() == cadastrarButton) {
             cadastrarAluno();
         } else if (e.getSource() == atualizarButton) {
-//            atualizarAluno();
+            atualizarAluno();
         } else if (e.getSource() == excluirButton) {
             excluirAluno();
         }
@@ -137,13 +134,13 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
             int idade = Integer.parseInt(idadeString);
             Aluno aluno = new Aluno(proximoId, nome, idade, email, endereco, cep, telefone, usuario, senha, curso, observacoes, ativo);
-            listar().add(aluno);
+            alunos.add(aluno);
             tableModel.addRow(aluno.toArray());
             proximoId++;
 
             limparCampos();
 
-            final String query = "INSERT INTO alunos (NomeCompleto, Idade, Email, Endereco, CEP," +
+            final String query = "INSERT INTO alunos (nome_completo, Idade, Email, Endereco, CEP," +
                     " Telefone, Usuario, Senha, Curso, Observacoes, Ativo) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             Connection conn = null;
@@ -151,19 +148,10 @@ public class AlunoCRUD extends JFrame implements ActionListener {
             ResultSet rs = null;
 
             try {
-                conn = ConectarBD.getConexao();
+                conn = ConectaBD.getConexao();
                 prepStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-                prepStmt.setString(1, nome);
-                prepStmt.setInt(2, idade);
-                prepStmt.setString(3, email);
-                prepStmt.setString(4, endereco);
-                prepStmt.setString(5, cep);
-                prepStmt.setString(6, telefone);
-                prepStmt.setString(7, usuario);
-                prepStmt.setString(8, senha);
-                prepStmt.setString(9, curso);
-                prepStmt.setString(10, observacoes);
-                prepStmt.setString(11, ativo);
+
+                inserirBd(nome, email, endereco, cep, telefone, usuario, senha, curso, observacoes, ativo, idade, prepStmt);
 
                 prepStmt.executeUpdate();
 
@@ -179,95 +167,81 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         }
     }
 
-//    private void atualizarAluno() {
-//
-//        int selectedRow = tabela.getSelectedRow();
-//        if (selectedRow >= 0) {
-//            String nome = nomeField.getText();
-//            String idadeString = idadeField.getText();
-//            String email = emailField.getText();
-//            String endereco = enderecoField.getText();
-//            String cep = cepField.getText();
-//            String telefone = telefoneField.getText();
-//            String usuario = usuarioField.getText();
-//            String senha = new String(senhaField.getPassword());
-//            String curso = (String) cursoComboBox.getSelectedItem();
-//            String observacoes = observacoesField.getText();
-//            boolean ativo = ativoCheckBox.isSelected();
-//
-//            if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
-//                int idade = Integer.parseInt(idadeString);
-//
-//                Aluno aluno = alunos.get(selectedRow);
-//                aluno.setNome(nome);
-//                aluno.setIdade(idade);
-//                aluno.setEmail(email);
-//                aluno.setEndereco(endereco);
-//                aluno.setCep(cep);
-//                aluno.setTelefone(telefone);
-//                aluno.setUsuario(usuario);
-//                aluno.setSenha(senha);
-//                aluno.setCurso(curso);
-//                aluno.setObservacoes(observacoes);
-//                aluno.setAtivo(ativo);
-//
-//                // Atualizar linha na tabela
-//                tableModel.removeRow(selectedRow);
-//                tableModel.insertRow(selectedRow, aluno.toArray());
-//
-//                limparCampos();
-//
-//                // Atualizar no banco de dados
-//                final String query = "UPDATE alunos SET NomeCompleto=?, Idade=?, Email=?, Endereco=?, CEP=?, " +
-//                        "Telefone=?, Usuario=?, Senha=?, Curso=?, Observacoes=?, Ativo=? WHERE ID=?";
-//                Connection conn = null;
-//                PreparedStatement prepStmt = null;
-//
-//                try {
-//                    conn = ConectarBD.getConexao();
-//                    prepStmt = conn.prepareStatement(query);
-//                    prepStmt.setString(1, nome);
-//                    prepStmt.setInt(2, idade);
-//                    prepStmt.setString(3, email);
-//                    prepStmt.setString(4, endereco);
-//                    prepStmt.setString(5, cep);
-//                    prepStmt.setString(6, telefone);
-//                    prepStmt.setString(7, usuario);
-//                    prepStmt.setString(8, senha);
-//                    prepStmt.setString(9, curso);
-//                    prepStmt.setString(10, observacoes);
-//                    prepStmt.setBoolean(11, ativo);
-//                    prepStmt.setInt(12, aluno.getId());
-//
-//                    prepStmt.executeUpdate();
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                } finally {
-//                    // Certifique-se de fechar as conexões e a instrução preparada
-//                    if (prepStmt != null) {
-//                        try {
-//                            prepStmt.close();
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                    if (conn != null) {
-//                        try {
-//                            conn.close();
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            } else {
-//                JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios.");
-//            }
-//        } else {
-//            JOptionPane.showMessageDialog(this, "Selecione um aluno para atualizar.");
-//        }
-//
-//    }
+    private void atualizarAluno() {
+
+        int selectedRow = tabela.getSelectedRow();
+        if (selectedRow >= 0) {
+            String nome = nomeField.getText();
+            String idadeString = idadeField.getText();
+            String email = emailField.getText();
+            String endereco = enderecoField.getText();
+            String cep = cepField.getText();
+            String telefone = telefoneField.getText();
+            String usuario = usuarioField.getText();
+            String senha = new String(senhaField.getPassword());
+            String curso = (String) cursoComboBox.getSelectedItem();
+            String observacoes = observacoesField.getText();
+            String ativo = (String)ativoCheckBox.getSelectedItem();
+
+            if (!nome.isEmpty() && !idadeString.isEmpty() && !email.isEmpty() && !endereco.isEmpty() && !usuario.isEmpty() && !senha.isEmpty()) {
+                int idade = Integer.parseInt(idadeString);
+
+                Aluno aluno = alunos.get(selectedRow);
+                aluno.setNome(nome);
+                aluno.setIdade(idade);
+                aluno.setEmail(email);
+                aluno.setEndereco(endereco);
+                aluno.setCep(cep);
+                aluno.setTelefone(telefone);
+                aluno.setUsuario(usuario);
+                aluno.setSenha(senha);
+                aluno.setCurso(curso);
+                aluno.setObservacoes(observacoes);
+                aluno.setAtivo(ativo);
+
+                tableModel.removeRow(selectedRow);
+                tableModel.insertRow(selectedRow, aluno.toArray());
+
+                limparCampos();
+
+                final String query = "UPDATE alunos SET nome_completo=?, Idade=?, Email=?, Endereco=?, CEP=?, " +
+                        "Telefone=?, Usuario=?, Senha=?, Curso=?, Observacoes=?, Ativo=? WHERE ID=?";
+                Connection conn = null;
+                PreparedStatement prepStmt = null;
+
+                try {
+                    conn = ConectaBD.getConexao();
+                    prepStmt = conn.prepareStatement(query);
+                    inserirBd(nome, email, endereco, cep, telefone, usuario, senha, curso, observacoes, ativo, idade, prepStmt);
+                    prepStmt.setInt(12, aluno.getId());
+
+                    prepStmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                JOptionPane.showMessageDialog(null, "Preencha todos os campos obrigatórios.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione um aluno para atualizar.");
+        }
+
+    }
+
+    private void inserirBd(String nome, String email, String endereco, String cep, String telefone, String usuario, String senha, String curso, String observacoes,
+                           String ativo, int idade, PreparedStatement prepStmt) throws SQLException {
+        prepStmt.setString(1, nome);
+        prepStmt.setInt(2, idade);
+        prepStmt.setString(3, email);
+        prepStmt.setString(4, endereco);
+        prepStmt.setString(5, cep);
+        prepStmt.setString(6, telefone);
+        prepStmt.setString(7, usuario);
+        prepStmt.setString(8, senha);
+        prepStmt.setString(9, curso);
+        prepStmt.setString(10, observacoes);
+        prepStmt.setString(11, ativo);
+    }
 
     private void excluirAluno() {
 
@@ -275,7 +249,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         if (selectedRow >= 0) {
             int confirm = JOptionPane.showConfirmDialog(null, "Deseja remover o aluno selecionado?", "Remover Aluno", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                Aluno aluno = listar().get(selectedRow);
+                Aluno aluno = alunos.get(selectedRow);
                 tableModel.removeRow(selectedRow);
 
                 limparCampos();
@@ -286,7 +260,7 @@ public class AlunoCRUD extends JFrame implements ActionListener {
                 PreparedStatement prepStmt = null;
 
                 try {
-                    conn = ConectarBD.getConexao();
+                    conn = ConectaBD.getConexao();
 
                     prepStmt = conn.prepareStatement(query);
                     prepStmt.setInt(1, aluno.getId());
@@ -310,22 +284,24 @@ public class AlunoCRUD extends JFrame implements ActionListener {
         ResultSet rs = null;
 
         try {
-            conn = ConectarBD.getConexao();
+            conn = ConectaBD.getConexao();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
 
+            alunos.clear();
+
             while (rs.next()) {
-                 aluno = new Aluno();
-                 aluno.setId(rs.getInt("ID"));
-                 aluno.setNome(rs.getString("NomeCompleto"));
-                 aluno.setIdade(rs.getInt("Idade"));
-                 aluno.setEmail(rs.getString("Email"));
-                 aluno.setEndereco(rs.getString("Endereco"));
-                 aluno.setCep(rs.getString("CEP"));
-                 aluno.setTelefone(rs.getString("Telefone"));
-                 aluno.setCurso(rs.getString("Curso"));
-                 aluno.setObservacoes(rs.getString("Observacoes"));
-                 aluno.setAtivo(rs.getString("Ativo"));
+                aluno = new Aluno();
+                aluno.setId(rs.getInt("ID"));
+                aluno.setNome(rs.getString("nome_completo"));
+                aluno.setIdade(rs.getInt("Idade"));
+                aluno.setEmail(rs.getString("Email"));
+                aluno.setEndereco(rs.getString("Endereco"));
+                aluno.setCep(rs.getString("CEP"));
+                aluno.setTelefone(rs.getString("Telefone"));
+                aluno.setCurso(rs.getString("Curso"));
+                aluno.setObservacoes(rs.getString("Observacoes"));
+                aluno.setAtivo(rs.getString("Ativo"));
 
                 tableModel.addRow(aluno.toArray());
                 alunos.add(aluno);
